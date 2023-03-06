@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
 import {
   useAccount,
   useBalance,
@@ -11,6 +11,7 @@ import {
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import Link from 'next/link'
 import { HiOutlineLogout } from 'react-icons/hi'
+import { saveAddress } from '@sharemint/sdk'
 import FormatNativeCrypto from './FormatNativeCrypto'
 import ConnectWalletButton from 'components/ConnectWalletButton'
 import useMounted from 'hooks/useMounted'
@@ -20,6 +21,9 @@ import { truncateAddress, truncateEns } from 'lib/truncateText'
 const DARK_MODE = process.env.NEXT_PUBLIC_DARK_MODE
 const DISABLE_POWERED_BY_RESERVOIR =
   process.env.NEXT_PUBLIC_DISABLE_POWERED_BY_RESERVOIR
+const REFERRAL_SIGN_UP_URL =
+  process.env.NEXT_PUBLIC_REFERRAL_SIGN_UP_URL ||
+  'https://sharemint.xyz/marketplace/sharer'
 
 const ConnectWallet: FC = () => {
   const account = useAccount()
@@ -29,6 +33,15 @@ const ConnectWallet: FC = () => {
   const { disconnect } = useDisconnect()
   const wallet = connectors[0]
   const isMounted = useMounted()
+
+  useEffect(() => {
+    if (account.address && process.env.NEXT_PUBLIC_SHAREMINT_SLUG) {
+      saveAddress({
+        slug: process.env.NEXT_PUBLIC_SHAREMINT_SLUG,
+        address: account.address,
+      })
+    }
+  }, [])
 
   if (!isMounted) {
     return null
@@ -73,6 +86,16 @@ const ConnectWallet: FC = () => {
               </a>
             </DropdownMenu.Item>
           </Link>
+          <DropdownMenu.Item asChild>
+            <a
+              href={REFERRAL_SIGN_UP_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex w-full cursor-pointer items-center justify-between rounded px-4 py-3 outline-none transition hover:bg-neutral-100 focus:bg-neutral-100 dark:hover:bg-neutral-800 dark:focus:bg-neutral-800"
+            >
+              Refer a friend
+            </a>
+          </DropdownMenu.Item>
           <DropdownMenu.Item asChild>
             <button
               key={wallet.id}
